@@ -1,0 +1,336 @@
+{
+  "pages": [
+    {
+      "id": "page-1",
+      "widgets": {
+        "kpi_funded": {
+          "type": "value",
+          "format": {
+            "title": {
+              "enabled": true,
+              "text": "Escrow funded on PayPal"
+            }
+          },
+          "dataMapping": {
+            "value": [
+              {
+                "id": "pacts.escrow_total",
+                "aggregation": "sum"
+              }
+            ]
+          }
+        },
+        "kpi_released": {
+          "type": "value",
+          "format": {
+            "title": {
+              "enabled": true,
+              "text": "Released to sellers"
+            }
+          },
+          "dataMapping": {
+            "value": [
+              {
+                "id": "pacts.released",
+                "aggregation": "sum"
+              }
+            ]
+          }
+        },
+        "kpi_confidence": {
+          "type": "value",
+          "format": {
+            "title": {
+              "enabled": true,
+              "text": "Avg arbiter confidence (%)"
+            }
+          },
+          "dataMapping": {
+            "value": [
+              {
+                "id": "reviews.confidence",
+                "aggregation": "avg"
+              }
+            ]
+          }
+        },
+        "kpi_flags": {
+          "type": "value",
+          "format": {
+            "title": {
+              "enabled": true,
+              "text": "Manipulation attempts blocked"
+            }
+          },
+          "dataMapping": {
+            "value": [
+              {
+                "id": "pacts.red_flags",
+                "aggregation": "sum"
+              }
+            ]
+          }
+        },
+        "filter_seller": {
+          "type": "list-filter",
+          "format": {
+            "title": {
+              "enabled": true,
+              "text": "Seller type"
+            }
+          },
+          "dataMapping": {
+            "value": [
+              {
+                "id": "pacts.seller_type"
+              }
+            ]
+          }
+        },
+        "filter_status": {
+          "type": "list-filter",
+          "format": {
+            "title": {
+              "enabled": true,
+              "text": "Pact status"
+            }
+          },
+          "dataMapping": {
+            "value": [
+              {
+                "id": "pacts.status"
+              }
+            ]
+          }
+        },
+        "filter_source": {
+          "type": "list-filter",
+          "format": {
+            "title": {
+              "enabled": true,
+              "text": "Data source"
+            }
+          },
+          "dataMapping": {
+            "value": [
+              {
+                "id": "pacts.data_source"
+              }
+            ]
+          }
+        },
+        "chart_released": {
+          "type": "column-chart-stacked",
+          "format": {
+            "title": {
+              "enabled": true,
+              "text": "Money released to sellers per week, by seller type"
+            }
+          },
+          "dataMapping": {
+            "categoryKey": [
+              {
+                "id": "pacts.funded_date::week"
+              }
+            ],
+            "valueKey": [
+              {
+                "id": "pacts.released",
+                "aggregation": "sum"
+              }
+            ],
+            "legendKey": [
+              {
+                "id": "pacts.seller_type"
+              }
+            ]
+          }
+        },
+        "chart_decisions": {
+          "type": "donut-chart",
+          "format": {
+            "title": {
+              "enabled": true,
+              "text": "Arbiter decisions"
+            }
+          },
+          "dataMapping": {
+            "categoryKey": [
+              {
+                "id": "reviews.decision"
+              }
+            ],
+            "valueKey": [
+              {
+                "id": "reviews.review_id",
+                "aggregation": "count"
+              }
+            ]
+          }
+        },
+        "chart_quality": {
+          "type": "bar-chart-grouped",
+          "format": {
+            "title": {
+              "enabled": true,
+              "text": "Human vs AI-agent sellers: verification quality"
+            }
+          },
+          "dataMapping": {
+            "categoryKey": [
+              {
+                "id": "pacts.seller_type"
+              }
+            ],
+            "valueKey": [
+              {
+                "id": "reviews.confidence",
+                "aggregation": "avg"
+              },
+              {
+                "id": "reviews.criteria_met_pct",
+                "aggregation": "avg"
+              }
+            ]
+          }
+        },
+        "chart_flow": {
+          "type": "funnel-chart",
+          "format": {
+            "title": {
+              "enabled": true,
+              "text": "PayPal money flow (hold → capture → refund)"
+            }
+          },
+          "dataMapping": {
+            "categoryKey": [
+              {
+                "id": "ledger.kind"
+              }
+            ],
+            "valueKey": [
+              {
+                "id": "ledger.amount",
+                "aggregation": "sum"
+              }
+            ]
+          }
+        },
+        "grid_pacts": {
+          "type": "grid",
+          "format": {
+            "title": {
+              "enabled": true,
+              "text": "Pacts"
+            }
+          },
+          "dataMapping": {
+            "cols": [
+              {
+                "id": "pacts.title"
+              },
+              {
+                "id": "pacts.seller_type"
+              },
+              {
+                "id": "pacts.status"
+              },
+              {
+                "id": "pacts.escrow_total",
+                "aggregation": "sum"
+              },
+              {
+                "id": "pacts.released",
+                "aggregation": "sum"
+              },
+              {
+                "id": "pacts.disputes",
+                "aggregation": "sum"
+              },
+              {
+                "id": "pacts.red_flags",
+                "aggregation": "sum"
+              }
+            ]
+          }
+        }
+      },
+      "widgetLayout": {
+        "kpi_funded": {
+          "xTrack": 0,
+          "yTrack": 0,
+          "xSpan": 6,
+          "ySpan": 7
+        },
+        "kpi_released": {
+          "xTrack": 6,
+          "yTrack": 0,
+          "xSpan": 6,
+          "ySpan": 7
+        },
+        "kpi_confidence": {
+          "xTrack": 12,
+          "yTrack": 0,
+          "xSpan": 6,
+          "ySpan": 7
+        },
+        "kpi_flags": {
+          "xTrack": 18,
+          "yTrack": 0,
+          "xSpan": 6,
+          "ySpan": 7
+        },
+        "filter_seller": {
+          "xTrack": 0,
+          "yTrack": 7,
+          "xSpan": 8,
+          "ySpan": 5
+        },
+        "filter_status": {
+          "xTrack": 8,
+          "yTrack": 7,
+          "xSpan": 8,
+          "ySpan": 5
+        },
+        "filter_source": {
+          "xTrack": 16,
+          "yTrack": 7,
+          "xSpan": 8,
+          "ySpan": 5
+        },
+        "chart_released": {
+          "xTrack": 0,
+          "yTrack": 12,
+          "xSpan": 15,
+          "ySpan": 17
+        },
+        "chart_decisions": {
+          "xTrack": 15,
+          "yTrack": 12,
+          "xSpan": 9,
+          "ySpan": 17
+        },
+        "chart_quality": {
+          "xTrack": 0,
+          "yTrack": 29,
+          "xSpan": 12,
+          "ySpan": 16
+        },
+        "chart_flow": {
+          "xTrack": 12,
+          "yTrack": 29,
+          "xSpan": 12,
+          "ySpan": 16
+        },
+        "grid_pacts": {
+          "xTrack": 0,
+          "yTrack": 45,
+          "xSpan": 24,
+          "ySpan": 18
+        }
+      }
+    }
+  ],
+  "selectedPageId": "page-1",
+  "version": "3.1.0"
+}

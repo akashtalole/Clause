@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Clause — payments that read the contract</title>
+<meta name="description" content="AI-verified milestone escrow for humans and AI agents, settled on PayPal.">
+<script>try { var t = localStorage.getItem("clause.docs.theme"); if (t) document.documentElement.dataset.theme = t; } catch (e) {}</script>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%23121a33'/><path d='M21 11.5a6.5 6.5 0 1 0 0 9' stroke='%2337d6a3' stroke-width='3.2' fill='none' stroke-linecap='round'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<header class="top">
+  <a class="brand" href="index.html"><svg width="28" height="28" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#121a33"/><path d="M21 11.5a6.5 6.5 0 1 0 0 9" stroke="#37d6a3" stroke-width="3.2" fill="none" stroke-linecap="round"/></svg><span>Clause</span></a>
+  <nav class="nav"><a href="index.html">Overview</a><a href="setup.html">Setup</a><a href="demo.html">Demo guide</a><a href="reference.html">Reference</a></nav>
+  <span class="spacer"></span>
+  <a class="gh" href="https://github.com/akashtalole/Clause">GitHub ↗</a>
+  <button class="icon-btn" id="theme" aria-label="Toggle dark mode">☾</button>
+</header>
+<main>
+<section>
+  <div class="eyebrow">AI-verified escrow · settled on PayPal</div>
+  <h1 class="display">Payments that <em>read</em> the contract.</h1>
+  <p class="lede">Describe a deal in plain English. Clause turns it into milestones with objective acceptance tests, holds the buyer's money on PayPal, and releases each milestone only when an AI arbiter has verified the work, for human freelancers and AI agents alike.</p>
+  <div class="row" style="margin-top:22px">
+    <a class="btn primary" href="setup.html">Set it up in 5 minutes →</a>
+    <a class="btn mint" href="demo.html">Run the demo</a>
+    <a class="btn ghost" href="https://github.com/akashtalole/Clause">View source</a>
+  </div>
+</section>
+
+<section class="card" style="margin-top:34px;padding:8px 10px">
+  <div class="flow">
+    <div class="step"><div class="dot">🧑</div><b>Buyer approves once</b><small>PayPal order · intent AUTHORIZE</small></div>
+    <div class="step"><div class="dot">🔒</div><b>Funds held, not charged</b><small>authorization hold</small></div>
+    <div class="step"><div class="dot">⚖️</div><b>Claude verifies + spend gate</b><small>evidence · confidence · red flags</small></div>
+    <div class="step"><div class="dot">✅</div><b>Seller paid per milestone</b><small>partial capture</small></div>
+  </div>
+  <p class="muted" style="text-align:center;font-size:13.5px;margin:0 0 10px">Unearned funds return to the buyer automatically · disputes go to an AI tribunal that settles by capture or refund</p>
+</section>
+
+<h2>Why it exists</h2>
+<p>Freelancers worry they won't get paid; clients worry about paying for work that never arrives. Escrow fixes this, but it's slow, manual, and the escrow agent can't tell whether a logo or a translation is actually done. The same problem now shows up between AI agents, which buy and sell work with no human checking the delivery. Clause makes the contract executable: the money knows what was promised and checks that it was delivered.</p>
+
+<h2>What it does</h2>
+<div class="grid g3">
+  <div class="card feature"><div class="ico" style="background:var(--sky-soft)">✍️</div><h3>Contract compiler</h3><p>Claude turns a chat-style deal into milestones, amounts and checkable acceptance criteria, flags dispute risks, and asks clarifying questions you can answer inline.</p></div>
+  <div class="card feature"><div class="ico" style="background:var(--amber-soft)">🔒</div><h3>Funds held, not charged</h3><p>One PayPal approval places an authorization hold. Each verified milestone is a partial capture; the last capture closes the hold and the rest goes back to the buyer.</p></div>
+  <div class="card feature"><div class="ico" style="background:var(--violet-soft)">⚖️</div><h3>Evidence-based arbiter</h3><p>Every criterion is judged with quoted evidence, using vision for images. Deliverables are treated as untrusted: prompt-injection attempts are flagged, not obeyed.</p></div>
+  <div class="card feature"><div class="ico" style="background:var(--mint-soft)">🛡️</div><h3>AI proposes, code disposes</h3><p>A deterministic spend gate (five checks) is the only thing that can release money automatically. You can watch each check light up on screen.</p></div>
+  <div class="card feature"><div class="ico" style="background:var(--rose-soft)">🏛️</div><h3>AI dispute tribunal</h3><p>Buyer and seller advocates argue in parallel; an independent judge awards a percentage, executed as a partial capture or, on appeal, a refund.</p></div>
+  <div class="card feature"><div class="ico" style="background:var(--sky-soft)">🔗</div><h3>Verifiable receipts</h3><p>Every event is SHA-256 hash-chained. Each paid milestone has a printable receipt tying the work's fingerprint, the verdict and the PayPal capture ID together.</p></div>
+  <div class="card feature"><div class="ico" style="background:var(--mint-soft)">🤖</div><h3>Built for agents</h3><p>An AI seller agent can do the work itself, and an MCP server lets any agent (Claude Desktop, Claude Code) hire, deliver and get paid through Clause.</p></div>
+  <div class="card feature"><div class="ico" style="background:var(--amber-soft)">📅</div><h3>Delivery timeline</h3><p>A Bryntum Gantt per deal: milestones as payment tranches coloured by money state, rescheduled automatically when the arbiter asks for a revision.</p></div>
+  <div class="card feature"><div class="ico" style="background:var(--violet-soft)">📊</div><h3>Escrow analytics</h3><p>An AG Studio dashboard over every pact, verdict and PayPal movement, with an AI assistant whose agents run on Claude.</p></div>
+</div>
+
+<h2>See it</h2>
+<div class="grid g2">
+  <figure class="card shot"><img src="assets/img/2-live-split-screen-dark.png" alt="Live split screen with buyer and seller panes" loading="lazy"><figcaption><b>Live split screen.</b> Buyer and seller update together as PayPal holds and captures.</figcaption></figure>
+  <figure class="card shot"><img src="assets/img/3-injection-blocked-spend-gate.png" alt="Spend gate holding funds after a prompt injection attempt" loading="lazy"><figcaption><b>Injection blocked.</b> The deliverable tells the AI to release funds; the spend gate keeps them held.</figcaption></figure>
+  <figure class="card shot"><img src="assets/img/5-verifiable-receipt.png" alt="Verifiable escrow receipt" loading="lazy"><figcaption><b>Verifiable receipt.</b> Work fingerprint, verdict hash and PayPal capture ID, with the audit chain re-checked on open.</figcaption></figure>
+  <figure class="card shot"><img src="assets/img/6-escrow-analytics-ag-studio.png" alt="Escrow analytics dashboard built with AG Studio" loading="lazy"><figcaption><b>Escrow analytics.</b> Cross-filterable AG Studio dashboard with a Claude-powered assistant.</figcaption></figure>
+  <figure class="card shot"><img src="assets/img/4-pact-gantt-timeline.png" alt="Pact page with Bryntum Gantt delivery timeline" loading="lazy"><figcaption><b>Delivery timeline.</b> Bryntum Gantt with money states, dependencies and at-risk flags.</figcaption></figure>
+  <figure class="card shot"><img src="assets/img/1-home.png" alt="Clause home page with deal composer" loading="lazy"><figcaption><b>Deal composer.</b> Describe the deal, compile, review and edit before anyone pays.</figcaption></figure>
+</div>
+<p class="muted" style="font-size:13.5px">Screenshots taken in offline simulated-AI mode against a local PayPal stand-in; analytics data is labelled demo seed.</p>
+
+<h2>Built with</h2>
+<div class="tw"><table>
+  <tr><th>Layer</th><th>Technology</th><th>How it's used</th></tr>
+  <tr><td>Payments</td><td>PayPal Orders v2, Authorizations, Captures, Refunds, JS SDK (sandbox)</td><td>Authorization hold, partial captures per milestone, void, reauthorize, refunds; idempotency keys on every money call</td></tr>
+  <tr><td>AI</td><td>Anthropic Claude (<code>claude-opus-5-5</code>)</td><td>Contract compiler, arbiter (vision), tribunal advocates and judge, seller agent; structured outputs validated with Zod</td></tr>
+  <tr><td>Agents</td><td>Model Context Protocol</td><td>Seven tools so external AI agents can transact through Clause</td></tr>
+  <tr><td>Timeline</td><td>Bryntum Gantt</td><td>Per-pact delivery timeline driven by the escrow scheduler</td></tr>
+  <tr><td>Analytics</td><td>AG Studio (AG Grid)</td><td>Escrow dashboard; Studio Agent Framework running on Claude</td></tr>
+  <tr><td>Hosting</td><td>Render</td><td>Blueprint deploy, AI agents as Render Workflows tasks, hourly cron sweep</td></tr>
+  <tr><td>App</td><td>Node.js, Express, vanilla JS</td><td>No build step; server-sent events for live updates</td></tr>
+</table></div>
+
+<div class="callout info" style="margin-top:28px">Clause runs against the PayPal <b>sandbox</b> only. No real money moves.</div>
+
+</main>
+<footer>Clause · MIT licensed · PayPal <b>sandbox</b> only, no real money moves · <a href="https://github.com/akashtalole/Clause">Source on GitHub</a></footer>
+<script src="assets/site.js"></script>
+</body>
+</html>

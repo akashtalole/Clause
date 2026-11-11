@@ -1,0 +1,50 @@
+# Render Blueprint for Clause. Click "New > Blueprint" in Render and point it at this repo.
+#   clause-escrow  — web service (UI, API, PayPal, spend gate)
+#   clause-sweep   — cron job: reauthorizes PayPal holds past the 3-day honor period, flags overdue milestones
+# The AI agents run as a Render Workflow (src/workflows.js); create it from the dashboard (see README),
+# then set RENDER_WORKFLOW_SLUG and RENDER_API_KEY on the web service.
+services:
+  - type: web
+    name: clause-escrow
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: PAYPAL_SANDBOX_CLIENT_ID
+        sync: false
+      - key: PAYPAL_SANDBOX_CLIENT_SECRET
+        sync: false
+      - key: APP_BASE_URL
+        sync: false
+      - key: RENDER_WORKFLOW_SLUG
+        sync: false
+      - key: RENDER_API_KEY
+        sync: false
+      - key: CRON_SECRET
+        generateValue: true
+      - key: CLAUDE_MODEL
+        value: claude-opus-5-5
+      - key: AUTO_RELEASE_MIN_CONFIDENCE
+        value: "0.75"
+
+  - type: cron
+    name: clause-sweep
+    runtime: node
+    schedule: "17 * * * *"
+    buildCommand: npm install
+    startCommand: node scripts/sweep.js
+    envVars:
+      - key: CLAUSE_URL
+        fromService:
+          type: web
+          name: clause-escrow
+          property: host
+      - key: CRON_SECRET
+        fromService:
+          type: web
+          name: clause-escrow
+          envVarKey: CRON_SECRET

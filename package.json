@@ -1,0 +1,40 @@
+{
+  "name": "clause",
+  "version": "1.0.0",
+  "description": "Clause — payments that read the contract. AI-verified milestone escrow for humans and AI agents, on PayPal.",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "mcp": "node src/mcp.js",
+    "smoke": "node scripts/smoke.js",
+    "test": "node --test test/*.test.js",
+    "seed": "node scripts/seed-demo.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/akashtalole/Clause.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/akashtalole/Clause/issues"
+  },
+  "homepage": "https://akashtalole.github.io/Clause/",
+  "dependencies": {
+    "@anthropic-ai/sdk": "^1.7.0",
+    "@bryntum/gantt": "npm:@bryntum/gantt-trial@^7.3.8",
+    "@modelcontextprotocol/sdk": "^1.32.2",
+    "@renderinc/sdk": "^1.8.0",
+    "ag-studio": "^3.1.0",
+    "dotenv": "^18.0.10",
+    "express": "^5.3.0",
+    "multer": "^2.5.0",
+    "zod": "^4.6.7"
+  },
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  }
+}

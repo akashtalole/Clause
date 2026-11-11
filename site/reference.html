@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reference · Clause</title>
+<meta name="description" content="Architecture, spend gate, PayPal APIs, REST API, MCP tools and integrations.">
+<script>try { var t = localStorage.getItem("clause.docs.theme"); if (t) document.documentElement.dataset.theme = t; } catch (e) {}</script>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%23121a33'/><path d='M21 11.5a6.5 6.5 0 1 0 0 9' stroke='%2337d6a3' stroke-width='3.2' fill='none' stroke-linecap='round'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<header class="top">
+  <a class="brand" href="index.html"><svg width="28" height="28" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#121a33"/><path d="M21 11.5a6.5 6.5 0 1 0 0 9" stroke="#37d6a3" stroke-width="3.2" fill="none" stroke-linecap="round"/></svg><span>Clause</span></a>
+  <nav class="nav"><a href="index.html">Overview</a><a href="setup.html">Setup</a><a href="demo.html">Demo guide</a><a href="reference.html">Reference</a></nav>
+  <span class="spacer"></span>
+  <a class="gh" href="https://github.com/akashtalole/Clause">GitHub ↗</a>
+  <button class="icon-btn" id="theme" aria-label="Toggle dark mode">☾</button>
+</header>
+<main>
+<div class="layout">
+<aside class="toc"><div class="eyebrow">Reference</div>
+  <a href="#arch">Architecture</a><a href="#lifecycle">Pact lifecycle</a><a href="#gate">Spend gate</a><a href="#paypal">PayPal APIs</a><a href="#claude">Claude roles</a><a href="#audit">Audit trail</a><a href="#api">REST API</a><a href="#mcp">MCP tools</a><a href="#integrations">Integrations</a><a href="#files">Project layout</a><a href="#limits">Limitations</a>
+</aside>
+<article class="doc">
+<div class="eyebrow">Reference</div>
+<h1>How Clause works</h1>
+
+<h2 id="arch">Architecture</h2>
+<pre><code>Buyer browser ──PayPal JS SDK popup──▶ PayPal Sandbox
+Buyer / Seller / AI agent ──REST + SSE──▶ Clause server (Express)
+MCP clients (Claude Desktop/Code) ──stdio──▶ src/mcp.js ──HTTP──▶ Clause server
+
+Clause server
+ ├─ pacts.js      state machine · spend gate · settlement · disputes · scheduler
+ ├─ ai.js         Claude: compiler · arbiter · tribunal · seller agent
+ ├─ jobs.js       runs AI inline, or as Render Workflows tasks
+ ├─ paypal.js     Orders v2 · Authorizations · Captures · Refunds
+ ├─ audit.js      SHA-256 hash chain · fingerprints
+ └─ store.js      JSON file store</code></pre>
+
+<h2 id="lifecycle">Pact lifecycle</h2>
+<div class="tw"><table>
+  <tr><th>Pact status</th><th>Meaning</th></tr>
+  <tr><td><code>awaiting_funding</code></td><td>Compiled; waiting for the buyer's PayPal approval</td></tr>
+  <tr><td><code>active</code></td><td>Authorization hold placed; milestones delivered in order</td></tr>
+  <tr><td><code>completed</code></td><td>Every milestone settled; final capture closed the hold</td></tr>
+  <tr><td><code>cancelled</code></td><td>Remaining hold voided and returned to the buyer</td></tr>
+</table></div>
+<p>Milestone states: <code>pending</code> → <code>reviewing</code> → <code>released</code> (100%), <code>settled</code> (partial), <code>revision_requested</code>, <code>escalated</code> (buyer decides), <code>refunded</code>, <code>voided</code>.</p>
+
+<h2 id="gate">Spend gate</h2>
+<p>Claude only recommends. Money moves automatically only when all five deterministic checks pass (<code>spendGate()</code> in <code>src/pacts.js</code>):</p>
+<ol>
+  <li>The arbiter recommends release.</li>
+  <li>Every acceptance criterion is <code>met</code> (a criterion the model skips counts as <code>unverifiable</code>).</li>
+  <li>Confidence ≥ <code>AUTO_RELEASE_MIN_CONFIDENCE</code> (default 75%).</li>
+  <li>No red flags (e.g. prompt injection, plagiarism signals).</li>
+  <li>A live PayPal authorization hold exists.</li>
+</ol>
+<p>Otherwise funds stay held: the buyer can approve (fully or partially), or send the milestone to the tribunal.</p>
+
+<h2 id="paypal">PayPal APIs</h2>
+<div class="tw"><table>
+  <tr><th>Step</th><th>Endpoint</th></tr>
+  <tr><td>Create escrow order (one line item per milestone)</td><td><code>POST /v2/checkout/orders</code> with <code>intent: AUTHORIZE</code></td></tr>
+  <tr><td>Place the hold after approval</td><td><code>POST /v2/checkout/orders/{id}/authorize</code></td></tr>
+  <tr><td>Release a milestone</td><td><code>POST /v2/payments/authorizations/{id}/capture</code>, <code>final_capture=false</code> until the last</td></tr>
+  <tr><td>Return what's left</td><td><code>POST /v2/payments/authorizations/{id}/void</code></td></tr>
+  <tr><td>Extend long pacts</td><td><code>POST /v2/payments/authorizations/{id}/reauthorize</code></td></tr>
+  <tr><td>Appeal of released funds</td><td><code>POST /v2/payments/captures/{id}/refund</code></td></tr>
+</table></div>
+<p>Every money call sends a <code>PayPal-Request-Id</code>, and changes to a pact are serialized, so a retry or double click can't capture twice.</p>
+
+<h2 id="claude">Claude roles</h2>
+<div class="tw"><table>
+  <tr><th>Role</th><th>Call</th><th>Notes</th></tr>
+  <tr><td>Contract compiler</td><td>Structured output (Zod), effort medium</td><td>Milestones, amounts, objective criteria, risks, clarifying questions</td></tr>
+  <tr><td>Arbiter</td><td>Structured output + images, effort high</td><td>Per-criterion verdict with quoted evidence; deliverable treated as untrusted</td></tr>
+  <tr><td>Tribunal advocates</td><td>Two parallel calls, effort low</td><td>Buyer side and seller side; told to concede weak points</td></tr>
+  <tr><td>Tribunal judge</td><td>Structured output, effort high</td><td>Awards a percentage based on criteria actually met</td></tr>
+  <tr><td>Seller agent</td><td>Text, effort medium</td><td>Produces the deliverable; uses arbiter feedback on revisions</td></tr>
+</table></div>
+
+<h2 id="audit">Audit trail &amp; receipts</h2>
+<p>Each pact event stores <code>prevHash</code> and <code>hash = SHA-256(prevHash | canonical(event))</code>. Money events include the PayPal ID and amount inside the hashed data. Deliverables and verdicts get their own SHA-256 fingerprints. <code>GET /api/pacts/{id}/verify</code> recomputes the chain and reports the first broken event; receipts re-run it when opened.</p>
+
+<h2 id="api">REST API</h2>
+<div class="tw"><table>
+  <tr><th>Method</th><th>Path</th><th>Purpose</th></tr>
+  <tr><td><span class="pill m-post">POST</span></td><td><code>/api/pacts/draft</code></td><td>Compile <code>{ text }</code> into a draft (nothing saved)</td></tr>
+  <tr><td><span class="pill m-post">POST</span></td><td><code>/api/pacts</code></td><td>Create a pact from <code>{ draft, sellerKind }</code></td></tr>
+  <tr><td><span class="pill m-get">GET</span></td><td><code>/api/pacts</code>, <code>/api/pacts/{id}</code></td><td>List / get pacts (with money, schedule and audit status)</td></tr>
+  <tr><td><span class="pill m-get">GET</span></td><td><code>/api/pacts/{id}/stream</code></td><td>Server-sent events with live pact updates</td></tr>
+  <tr><td><span class="pill m-post">POST</span></td><td><code>/api/pacts/{id}/paypal/order</code></td><td>Create the PayPal order; returns <code>orderId</code> and <code>approveUrl</code></td></tr>
+  <tr><td><span class="pill m-post">POST</span></td><td><code>/api/pacts/{id}/paypal/authorize</code></td><td>Place the hold after approval</td></tr>
+  <tr><td><span class="pill m-post">POST</span></td><td><code>/api/pacts/{id}/milestones/{mid}/submit</code></td><td>Multipart <code>text</code>, <code>images</code>, <code>links</code>; runs the arbiter and spend gate</td></tr>
+  <tr><td><span class="pill m-post">POST</span></td><td><code>/api/pacts/{id}/milestones/{mid}/agent</code></td><td>AI seller agent does the work, then submits</td></tr>
+  <tr><td><span class="pill m-post">POST</span></td><td><code>/api/pacts/{id}/milestones/{mid}/release</code></td><td>Buyer approval, <code>{ percent }</code></td></tr>
+  <tr><td><span class="pill m-post">POST</span></td><td><code>/api/pacts/{id}/milestones/{mid}/dispute</code></td><td>Tribunal; <code>{ claim, by: "buyer" }</code> or <code>{ response, by: "seller" }</code></td></tr>
+  <tr><td><span class="pill m-post">POST</span></td><td><code>/api/pacts/{id}/cancel</code></td><td>Void the remaining hold</td></tr>
+  <tr><td><span class="pill m-post">POST</span></td><td><code>/api/pacts/{id}/refresh</code>, <code>/reauthorize</code></td><td>Sync authorization status from PayPal / extend the hold</td></tr>
+  <tr><td><span class="pill m-get">GET</span></td><td><code>/api/pacts/{id}/verify</code></td><td>Recompute the audit hash chain</td></tr>
+  <tr><td><span class="pill m-get">GET</span></td><td><code>/api/pacts/{id}/receipts/{mid}</code></td><td>Verifiable receipt for a settled milestone</td></tr>
+  <tr><td><span class="pill m-get">GET</span></td><td><code>/api/analytics/data</code></td><td>Tables and relationships for the analytics dashboard</td></tr>
+  <tr><td><span class="pill m-post">POST</span></td><td><code>/api/ai/turn</code></td><td>One AG Studio agent turn executed by Claude</td></tr>
+  <tr><td><span class="pill m-post">POST</span></td><td><code>/api/maintenance/sweep</code></td><td>Cron sweep (header <code>x-cron-secret</code>)</td></tr>
+  <tr><td><span class="pill m-get">GET</span></td><td><code>/api/config</code>, <code>/api/health</code></td><td>Client config; health check</td></tr>
+</table></div>
+
+<h2 id="mcp">MCP tools</h2>
+<div class="tw"><table>
+  <tr><th>Tool</th><th>What it does</th></tr>
+  <tr><td><code>draft_pact</code></td><td>Compile a deal into a draft contract (nothing created)</td></tr>
+  <tr><td><code>create_pact</code></td><td>Create the pact and PayPal order; returns the approval URL for the human buyer</td></tr>
+  <tr><td><code>get_pact</code>, <code>list_pacts</code></td><td>Status, milestones, verdicts, money held and released</td></tr>
+  <tr><td><code>submit_deliverable</code></td><td>Seller delivers; returns verdict and spend-gate result</td></tr>
+  <tr><td><code>release_milestone</code></td><td>Buyer approval (use only with explicit human approval)</td></tr>
+  <tr><td><code>open_dispute</code></td><td>Send a milestone to the AI tribunal</td></tr>
+</table></div>
+
+<h2 id="integrations">Integrations</h2>
+<h3>Bryntum Gantt: delivery timeline</h3>
+<p><code>public/timeline.js</code>. Milestones are bars coloured by money state (held, reviewing, captured, partial, refunded), linked finish-to-start, with PayPal ledger events as time ranges. The server's scheduler adds a revision buffer whenever the arbiter requests a revision and flags milestones forecast past their deadline as at risk. Installed as <code>@bryntum/gantt@npm:@bryntum/gantt-trial</code> (trial watermark).</p>
+<h3>AG Studio (AG Grid): escrow analytics</h3>
+<p><code>public/analytics.js</code>, <code>src/analytics.js</code>, <code>src/studioAi.js</code>. Four related tables, a dashboard generated with Studio's own <code>add_widget</code>/<code>configure_widget</code> tools, a custom LLM adapter that runs Studio's built-in agents on Claude server-side, and a custom <i>Escrow risk analyst</i> agent with Clause tools that delegates chart-building to Studio's lead agent. Theme mapped to Clause's design tokens. Trial mode unless <code>AG_STUDIO_LICENSE_KEY</code> is set.</p>
+<h3>Render: hosting, Workflows and cron</h3>
+<p><code>render.yaml</code>, <code>src/workflows.js</code>, <code>src/jobs.js</code>, <code>scripts/sweep.js</code>. The AI agents run as Render Workflows tasks with retries (the tribunal fans its two advocates out in parallel); money never moves inside a task. An hourly cron job reauthorizes holds past PayPal's 3-day honor period and flags overdue milestones.</p>
+
+<h2 id="files">Project layout</h2>
+<pre><code>src/        server, pacts, paypal, ai, audit, jobs, workflows, analytics, studioAi, mcp, store
+public/     app (vanilla JS), timeline (Bryntum), analytics (AG Studio), styles
+scripts/    smoke, seed-demo, sweep, build-dashboard
+test/       lifecycle tests against a fake PayPal API, bridge and workflow tests
+site/       this documentation (GitHub Pages)</code></pre>
+
+<h2 id="limits">Limitations</h2>
+<ul>
+  <li>Buyer and seller roles are switched in the UI; production would add authentication and separate links.</li>
+  <li>Storage is a JSON file; swap in a database for production.</li>
+  <li>PayPal authorizations are honored for 3 days and valid for 29; long pacts rely on the reauthorize sweep.</li>
+  <li>Next steps: PayPal webhooks for capture reconciliation, Payouts to split one pact across several sellers, Disputes API sync.</li>
+</ul>
+</article>
+</div>
+
+</main>
+<footer>Clause · MIT licensed · PayPal <b>sandbox</b> only, no real money moves · <a href="https://github.com/akashtalole/Clause">Source on GitHub</a></footer>
+<script src="assets/site.js"></script>
+</body>
+</html>

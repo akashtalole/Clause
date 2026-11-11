@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Setup · Clause</title>
+<meta name="description" content="Install, configure and deploy Clause.">
+<script>try { var t = localStorage.getItem("clause.docs.theme"); if (t) document.documentElement.dataset.theme = t; } catch (e) {}</script>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%23121a33'/><path d='M21 11.5a6.5 6.5 0 1 0 0 9' stroke='%2337d6a3' stroke-width='3.2' fill='none' stroke-linecap='round'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<header class="top">
+  <a class="brand" href="index.html"><svg width="28" height="28" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#121a33"/><path d="M21 11.5a6.5 6.5 0 1 0 0 9" stroke="#37d6a3" stroke-width="3.2" fill="none" stroke-linecap="round"/></svg><span>Clause</span></a>
+  <nav class="nav"><a href="index.html">Overview</a><a href="setup.html">Setup</a><a href="demo.html">Demo guide</a><a href="reference.html">Reference</a></nav>
+  <span class="spacer"></span>
+  <a class="gh" href="https://github.com/akashtalole/Clause">GitHub ↗</a>
+  <button class="icon-btn" id="theme" aria-label="Toggle dark mode">☾</button>
+</header>
+<main>
+<div class="layout">
+<aside class="toc"><div class="eyebrow">On this page</div>
+  <a href="#prereq">Prerequisites</a><a href="#paypal">PayPal sandbox</a><a href="#install">Install & run</a><a href="#env">Configuration</a><a href="#check">Check your setup</a><a href="#render">Deploy on Render</a><a href="#mcp">Use from an AI agent</a><a href="#tests">Tests</a><a href="#trouble">Troubleshooting</a>
+</aside>
+<article class="doc">
+<div class="eyebrow">Setup</div>
+<h1>Run Clause in 5 minutes</h1>
+<p class="lede">You need Node.js, a free PayPal Developer account, and optionally an Anthropic API key.</p>
+
+<h2 id="prereq">Prerequisites</h2>
+<ul>
+  <li><b>Node.js 20 or newer</b> (22 recommended).</li>
+  <li>A <a href="https://developer.paypal.com/">PayPal Developer</a> account (free).</li>
+  <li>An <a href="https://console.anthropic.com/">Anthropic API key</a> for the AI features. Without one, Clause runs in a clearly labelled <b>simulated AI</b> mode so the PayPal flow still works.</li>
+</ul>
+
+<h2 id="paypal">PayPal sandbox</h2>
+<ol>
+  <li>Open the <a href="https://developer.paypal.com/dashboard/">Developer Dashboard</a> → <b>Apps &amp; Credentials</b> → <b>Sandbox</b>.</li>
+  <li>Create a REST app (or use the default). It belongs to your sandbox <b>Business</b> account, which is the seller and receives the money. Copy its <b>Client ID</b> and <b>Secret</b>.</li>
+  <li>Under <b>Testing Tools → Sandbox Accounts</b>, note your sandbox <b>Personal</b> account's email and password. You log in with it as the buyer in the PayPal popup.</li>
+</ol>
+<div class="callout tip">Sandbox accounts are fake: approving a payment moves sandbox funds only.</div>
+
+<h2 id="install">Install &amp; run</h2>
+<pre><code>git clone https://github.com/akashtalole/Clause.git</code></pre>
+<pre><code>cd Clause &amp;&amp; npm install &amp;&amp; cp .env.example .env</code></pre>
+<p>Fill in <code>.env</code> (see below), then optionally add labelled demo history for the analytics page, and start:</p>
+<pre><code>npm run seed</code></pre>
+<pre><code>npm start</code></pre>
+<p>Open <a href="http://localhost:3000">http://localhost:3000</a>. The header chips show whether Claude and PayPal are configured.</p>
+
+<h2 id="env">Configuration</h2>
+<div class="tw"><table>
+  <tr><th>Variable</th><th>Required</th><th>Purpose</th></tr>
+  <tr><td><code>PAYPAL_SANDBOX_CLIENT_ID</code></td><td>Yes</td><td>Sandbox REST app client ID (business / seller account)</td></tr>
+  <tr><td><code>PAYPAL_SANDBOX_CLIENT_SECRET</code></td><td>Yes</td><td>Sandbox REST app secret</td></tr>
+  <tr><td><code>ANTHROPIC_API_KEY</code></td><td>Recommended</td><td>Enables Claude; without it the AI is simulated</td></tr>
+  <tr><td><code>CLAUDE_MODEL</code></td><td>No</td><td>Defaults to <code>claude-opus-5-5</code></td></tr>
+  <tr><td><code>PAYPAL_BUYER_EMAIL</code></td><td>No</td><td>Shown as a login hint next to the PayPal button</td></tr>
+  <tr><td><code>APP_BASE_URL</code></td><td>No</td><td>Public URL for PayPal return links; derived from the request if unset</td></tr>
+  <tr><td><code>AUTO_RELEASE_MIN_CONFIDENCE</code></td><td>No</td><td>Spend-gate confidence threshold, default <code>0.75</code></td></tr>
+  <tr><td><code>REVISION_BUFFER_DAYS</code></td><td>No</td><td>Days added to the forecast per requested revision, default 2</td></tr>
+  <tr><td><code>AG_STUDIO_LICENSE_KEY</code></td><td>No</td><td>Removes the AG Studio trial watermark</td></tr>
+  <tr><td><code>RENDER_WORKFLOW_SLUG</code>, <code>RENDER_API_KEY</code></td><td>No</td><td>Run the AI agents as Render Workflows tasks instead of in-process</td></tr>
+  <tr><td><code>CRON_SECRET</code></td><td>No</td><td>Protects the maintenance sweep endpoint used by the cron job</td></tr>
+</table></div>
+
+<h2 id="check">Check your setup</h2>
+<pre><code>npm run smoke</code></pre>
+<p>Confirms the PayPal sandbox token, creates a test order with an approval link, and makes a tiny Claude call if a key is set.</p>
+
+<h2 id="render">Deploy on Render</h2>
+<p><a href="https://render.com/deploy?repo=https://github.com/akashtalole/Clause"><img src="https://render.com/images/deploy-to-render-button.svg" alt="Deploy to Render" style="display:inline"></a></p>
+<ol>
+  <li>Click the button (or Render → <b>New → Blueprint</b> → this repo). Fill in <code>ANTHROPIC_API_KEY</code>, <code>PAYPAL_SANDBOX_CLIENT_ID</code> and <code>PAYPAL_SANDBOX_CLIENT_SECRET</code>.</li>
+  <li>Optional: <b>New → Workflow</b> on the same repo, start command <code>node src/workflows.js</code>, env var <code>ANTHROPIC_API_KEY</code>. Then set <code>RENDER_WORKFLOW_SLUG</code> and <code>RENDER_API_KEY</code> on the web service so AI jobs run as Render Workflows tasks.</li>
+</ol>
+<div class="callout warn">Render's free web service sleeps when idle (first request takes ~30s), and its disk resets on redeploy. The Blueprint's cron job is a paid Render service type; remove the <code>clause-sweep</code> block from <code>render.yaml</code> for a free-only deploy.</div>
+
+<h2 id="mcp">Use from an AI agent (MCP)</h2>
+<p>With Clause running, register the MCP server in Claude Code:</p>
+<pre><code>claude mcp add clause -e CLAUSE_URL=http://localhost:3000 -- node /absolute/path/to/Clause/src/mcp.js</code></pre>
+<p>Or in Claude Desktop's <code>claude_desktop_config.json</code>:</p>
+<pre><code>{
+  "mcpServers": {
+    "clause": {
+      "command": "node",
+      "args": ["/absolute/path/to/Clause/src/mcp.js"],
+      "env": { "CLAUSE_URL": "http://localhost:3000" }
+    }
+  }
+}</code></pre>
+<p>Then ask: <i>"Use Clause to hire an agent to write 5 taglines for my bakery for $40, and give me the PayPal link to fund it."</i> Tool list in the <a href="reference.html#mcp">reference</a>.</p>
+
+<h2 id="tests">Tests</h2>
+<pre><code>npm test</code></pre>
+<p>Runs the real server against a local fake of the PayPal REST API: holds, partial and final captures, void, refund, prompt-injection blocking, delivery order, scheduler, audit-chain tampering, the AG Studio ↔ Claude bridge and the Render Workflows tasks.</p>
+
+<h2 id="trouble">Troubleshooting</h2>
+<div class="tw"><table>
+  <tr><th>Symptom</th><th>Fix</th></tr>
+  <tr><td>Header shows "PayPal not configured"</td><td>Set both <code>PAYPAL_SANDBOX_*</code> values in <code>.env</code> and restart.</td></tr>
+  <tr><td>Header shows "Simulated AI"</td><td>Add <code>ANTHROPIC_API_KEY</code> and restart.</td></tr>
+  <tr><td>PayPal popup blocked or closes</td><td>Use <b>Or open PayPal approval link</b> under the button; you return to the pact afterwards.</td></tr>
+  <tr><td><code>ORDER_NOT_APPROVED</code> error</td><td>The buyer didn't finish approving in PayPal; click the PayPal button again.</td></tr>
+  <tr><td>Capture fails on the 2nd milestone</td><td>Your sandbox business account may not allow multiple partial captures; check the error's PayPal debug ID in the server log.</td></tr>
+  <tr><td>Analytics page is empty</td><td>Run <code>npm run seed</code> for labelled demo history, or complete a live pact.</td></tr>
+</table></div>
+</article>
+</div>
+
+</main>
+<footer>Clause · MIT licensed · PayPal <b>sandbox</b> only, no real money moves · <a href="https://github.com/akashtalole/Clause">Source on GitHub</a></footer>
+<script src="assets/site.js"></script>
+</body>
+</html>

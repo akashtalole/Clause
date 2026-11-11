@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <script>try { var t = localStorage.getItem("clause.theme"); if (t) document.documentElement.dataset.theme = t; } catch (e) {}</script>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Clause — payments that read the contract</title>
+  <meta name="description" content="AI-verified milestone escrow for humans and AI agents, settled on PayPal." />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%23121a33'/><path d='M21 11.5a6.5 6.5 0 1 0 0 9' stroke='%2337d6a3' stroke-width='3.2' fill='none' stroke-linecap='round'/></svg>" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="#/">
+      <svg width="28" height="28" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="var(--ink)"/><path d="M21 11.5a6.5 6.5 0 1 0 0 9" stroke="var(--mint)" stroke-width="3.2" fill="none" stroke-linecap="round"/></svg>
+      <span>Clause</span>
+    </a>
+    <nav class="topnav">
+      <a href="#/">New pact</a>
+      <a href="#/pacts">Pacts</a>
+      <a href="#/analytics">Analytics</a>
+      <a href="#/how">How it works</a>
+    </nav>
+    <div id="mode" class="mode-pill" title="AI and PayPal configuration"></div>
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode" title="Toggle dark mode">◐</button>
+  </header>
+
+  <main id="app" aria-live="polite"></main>
+
+  <div id="toast" role="status"></div>
+
+  <footer class="foot">
+    PayPal <b>sandbox</b> only — no real money moves · <a href="https://github.com/akashtalole/Clause" target="_blank" rel="noopener">Source</a>
+  </footer>
+
+  <script type="module" src="/app.js"></script>
+</body>
+</html>
